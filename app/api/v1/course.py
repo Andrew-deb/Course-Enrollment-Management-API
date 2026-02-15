@@ -1,11 +1,11 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, HTTPException
 from typing import List
 from app.schemas.course import Course, CourseCreate, CourseUpdate
 from app.schemas.user import User
 from app.service.course import CourseService
 from app.api.deps import is_admin_user
 
-course_router = APIRouter(prefix="/courses", tags=["Courses"])
+course_router = APIRouter()
 
 # Admin-only endpoint
 
@@ -37,7 +37,7 @@ def delete_course(
 def get_course_by_id(course_id: int):
     course = CourseService.get_course_by_id(course_id)
     if not course:
-        return None
+        raise HTTPException(status_code=404, detail="Course not found")
     return course
 
 @course_router.get("/", response_model=List[Course])

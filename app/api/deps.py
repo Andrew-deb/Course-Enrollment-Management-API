@@ -12,7 +12,7 @@ def get_user(user_id: int):
 def is_admin_user(user_id: int):
     user = get_user(user_id)
     
-    if user.role != User.Role.ADMIN:
+    if user.role != UserRole.admin:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, 
             detail="Admin privileges required"
@@ -22,7 +22,7 @@ def is_admin_user(user_id: int):
 def is_student_user(user_id: int):
     user = get_user(user_id)
 
-    if user.role != UserRole.STUDENT:
+    if user.role != UserRole.student:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Only students can perform this action."

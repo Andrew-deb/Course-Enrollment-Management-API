@@ -8,7 +8,8 @@ class CourseCreate(CourseBase):
     pass
 
 class CourseUpdate(CourseBase):
-    pass
+    title: str = None
+    code: str = None
 
 class Course(CourseBase):
     id: int

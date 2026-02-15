@@ -3,7 +3,7 @@ from app.schemas.user import UserCreate
 from app.service.user import UserService
 
 
-user_router = APIRouter()
+user_router = APIRouter(tags=["Users"])
 
 
 # Admin-only endpoint

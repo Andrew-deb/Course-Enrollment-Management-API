@@ -1,4 +1,5 @@
 from fastapi import HTTPException, status
+from typing import List
 from app.schemas.enrollment import EnrollmentCreate, Enrollment
 from app.core.db import enrollments, users, courses
 
@@ -58,25 +59,23 @@ class EnrollmentService:
     @staticmethod
     def get_enrollments_by_user(user_id: int):
 
+        enrollments_for_user = []
         for enrollment in enrollments.values():
             if enrollment.user_id == user_id:
-                return enrollment
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Enrollment not found for this user."
-        )
+                enrollments_for_user.append(enrollment)
+        return enrollments_for_user
 
     # Get enrollment for a specific course
     @staticmethod
     def get_enrollments_by_course(course_id: int):
 
+        enrollments_for_course = []
+
         for enrollment in enrollments.values():
             if enrollment.course_id == course_id:
-                return enrollment
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Enrollment not found for this course."
-        )
+                enrollments_for_course.append(enrollment)
+
+        return enrollments_for_course
     
     # Delete enrollment
     @staticmethod

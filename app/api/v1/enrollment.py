@@ -1,11 +1,12 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, HTTPException
 from typing import List
 from app.schemas.enrollment import Enrollment, EnrollmentCreate
 from app.schemas.user import User
 from app.service.enrollment import EnrollmentService
+from app.service.course import CourseService
 from app.api.deps import is_student_user, is_admin_user
 
-enrollment_router = APIRouter(prefix="/enrollments", tags=["Enrollments"])
+enrollment_router = APIRouter(tags=["Enrollments"])
 
 # Student-only endpoint
 # Enroll in a course
@@ -14,7 +15,7 @@ def create_enrollment(
     enrollment_in: EnrollmentCreate, 
     user: User = Depends(is_student_user)
     ):
-    return EnrollmentService.create_enrollment(enrollment_in, user)
+    return EnrollmentService.create_enrollment(enrollment_in)
 
 # Deregister from a course
 @enrollment_router.delete("/{enrollment_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -22,7 +23,7 @@ def deregister_enrollment(
     enrollment_id: int, 
     user: User = Depends(is_student_user)
     ):
-    return EnrollmentService.delete_enrollment(enrollment_id, user)
+    return EnrollmentService.delete_enrollment(enrollment_id)
    
 
 # Retrieve enrollments for a specific student
@@ -43,6 +44,9 @@ def get_all_enrollments(admin_user: User = Depends(is_admin_user)):
 def get_enrollments_by_course(
     course_id: int, admin_user: User = Depends(is_admin_user)
     ):
+    course = CourseService.get_course_by_id(course_id)
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found")
     return EnrollmentService.get_enrollments_by_course(course_id)
 
 # Force deregister a student from a course 
