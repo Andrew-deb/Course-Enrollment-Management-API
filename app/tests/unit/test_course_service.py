@@ -187,7 +187,7 @@ class TestUpdateCourse:
         with pytest.raises(KeyError) as exc_info:
             CourseService.update_course(course2.id, update_data)
         
-        assert exc_info.value.args[0] == "Course with this code already exists"
+        assert exc_info.value.args[0] == "Course code already exists"
     
     def test_update_course_same_code_allowed(self):
         """Test updating course keeping the same code is allowed"""

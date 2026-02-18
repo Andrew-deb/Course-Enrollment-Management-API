@@ -28,7 +28,11 @@ def update_course(
     try:
         return CourseService.update_course(course_id, course_in)
     except KeyError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+        error_msg = str(e.args[0])
+        if "Course not found" in error_msg:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=error_msg)
+        else:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=error_msg)
 
 @course_router.delete("/{course_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_course(
