@@ -16,5 +16,20 @@ def get_user(user_id: int):
     
     user = UserService.get_user(user_id)
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
     return user
+
+@user_router.get("/")
+def get_all_users():
+
+    users = UserService.get_all_users()
+    if not users:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No users found"
+        )
+    return users
+    

@@ -14,7 +14,10 @@ def create_course(
     course_in: CourseCreate, 
     admin_user: User = Depends(is_admin_user)
     ):
-    return CourseService.create_course(course_in)
+    try:
+        return CourseService.create_course(course_in)
+    except KeyError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 @course_router.put("/{course_id}", response_model=Course, status_code=status.HTTP_200_OK)
 def update_course(
@@ -22,22 +25,28 @@ def update_course(
     course_in: CourseUpdate, 
     admin_user: User = Depends(is_admin_user)
     ):
-    return CourseService.update_course(course_id, course_in)
+    try:
+        return CourseService.update_course(course_id, course_in)
+    except KeyError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
 
 @course_router.delete("/{course_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_course(
     course_id: int, 
     admin_user: User = Depends(is_admin_user)
     ):
-    CourseService.delete_course(course_id)
-    return None
+    try:
+        CourseService.delete_course(course_id)
+        return None
+    except KeyError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
 
 # Public endpoints
 @course_router.get("/{course_id}", response_model=Course)
 def get_course_by_id(course_id: int):
     course = CourseService.get_course_by_id(course_id)
     if not course:
-        raise HTTPException(status_code=404, detail="Course not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Course not found")
     return course
 
 @course_router.get("/", response_model=List[Course])

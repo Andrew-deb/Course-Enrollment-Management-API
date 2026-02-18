@@ -1,4 +1,3 @@
-from fastapi import HTTPException,status
 from app.schemas.user import UserCreate, User
 from app.core.db import users
 
@@ -16,7 +15,6 @@ class UserService:
             id=user_id, 
             **user_dict
         )
-
         users[user_id] = user
 
         return user

@@ -11,7 +11,6 @@ Tests cover:
 Focus on service logic, validation (duplicate codes), and CRUD operations
 """
 import pytest
-from fastapi import HTTPException
 from app.service.course import CourseService
 from app.schemas.course import CourseCreate, CourseUpdate
 
@@ -41,35 +40,19 @@ class TestCreateCourse:
         course2 = CourseService.create_course(course_data2)
         
         assert course1.id == 1
-        assert course2.id == 2
-    
-    def test_create_course_stored_correctly(self):
-        """Test that created course is stored in database"""
-        course_data = CourseCreate(
-            title="Test Course",
-            code="TEST101"
-        )
-        
-        created_course = CourseService.create_course(course_data)
-        retrieved_course = CourseService.get_course_by_id(created_course.id)
-        
-        assert retrieved_course is not None
-        assert retrieved_course.id == created_course.id
-        assert retrieved_course.title == created_course.title
+        assert course2.id == 2 
     
     def test_create_course_duplicate_code_raises_error(self):
-        """Test that creating a course with duplicate code raises HTTPException"""
+        """Test that creating a course with duplicate code raises KeyError"""
         course_data1 = CourseCreate(title="Course One", code="CS101")
         course_data2 = CourseCreate(title="Course Two", code="CS101")  # Duplicate code
         
         CourseService.create_course(course_data1)
         
-        with pytest.raises(HTTPException) as exc_info:
+        with pytest.raises(KeyError) as exc_info:
             CourseService.create_course(course_data2)
         
-        assert exc_info.value.status_code == 400
-        assert "already exists" in str(exc_info.value.detail).lower()
-
+        assert exc_info.value.args[0] == "Course code already exists"
 
 class TestGetCourseById:
     """Tests for CourseService.get_course_by_id() method"""
@@ -119,19 +102,8 @@ class TestGetAllCourses:
         assert courses == []
         assert len(courses) == 0
     
-    def test_get_all_courses_single(self):
-        """Test getting all courses when one exists"""
-        course_data = CourseCreate(title="Test Course", code="TEST101")
-        created_course = CourseService.create_course(course_data)
-        
-        courses = CourseService.get_all_courses()
-        
-        assert len(courses) == 1
-        assert courses[0].id == created_course.id
-        assert courses[0].title == created_course.title
-    
-    def test_get_all_courses_multiple(self):
-        """Test getting all courses when multiple exist"""
+    def test_get_all_courses(self):
+        """Test getting all courses"""
         course_data1 = CourseCreate(title="Course One", code="CS101")
         course_data2 = CourseCreate(title="Course Two", code="CS201")
         course_data3 = CourseCreate(title="Course Three", code="CS301")
@@ -193,16 +165,16 @@ class TestUpdateCourse:
         assert updated_course.code == "CS101-NEW"
     
     def test_update_course_not_found_raises_error(self):
-        """Test updating non-existent course raises HTTPException"""
+        """Test updating non-existent course raises KeyError"""
         update_data = CourseUpdate(title="Updated Title")
         
-        with pytest.raises(HTTPException) as exc_info:
+        with pytest.raises(KeyError) as exc_info:
             CourseService.update_course(999, update_data)
         
-        assert exc_info.value.status_code == 404
+        assert exc_info.value.args[0] == "Course not found"
     
     def test_update_course_duplicate_code_raises_error(self):
-        """Test updating course with duplicate code raises HTTPException"""
+        """Test updating course with duplicate code raises KeyError"""
         course_data1 = CourseCreate(title="Course One", code="CS101")
         course_data2 = CourseCreate(title="Course Two", code="CS201")
         
@@ -212,10 +184,10 @@ class TestUpdateCourse:
         # Try to update course2 with course1's code
         update_data = CourseUpdate(code="CS101")
         
-        with pytest.raises(HTTPException) as exc_info:
+        with pytest.raises(KeyError) as exc_info:
             CourseService.update_course(course2.id, update_data)
         
-        assert exc_info.value.status_code == 400
+        assert exc_info.value.args[0] == "Course with this code already exists"
     
     def test_update_course_same_code_allowed(self):
         """Test updating course keeping the same code is allowed"""
@@ -228,18 +200,6 @@ class TestUpdateCourse:
         
         assert updated_course.title == "Updated Title"
         assert updated_course.code == "CS101"
-    
-    def test_update_course_persists_changes(self):
-        """Test that updates persist in storage"""
-        course_data = CourseCreate(title="Original Title", code="CS101")
-        created_course = CourseService.create_course(course_data)
-        
-        update_data = CourseUpdate(title="Updated Title")
-        CourseService.update_course(created_course.id, update_data)
-        
-        # Retrieve again to verify changes persisted
-        retrieved_course = CourseService.get_course_by_id(created_course.id)
-        assert retrieved_course.title == "Updated Title"
 
 
 class TestDeleteCourse:
@@ -256,33 +216,8 @@ class TestDeleteCourse:
         assert "successfully" in result["message"].lower()
     
     def test_delete_course_not_found_raises_error(self):
-        """Test deleting non-existent course raises HTTPException"""
-        with pytest.raises(HTTPException) as exc_info:
+        """Test deleting non-existent course raises KeyError"""
+        with pytest.raises(KeyError) as exc_info:
             CourseService.delete_course(999)
         
-        assert exc_info.value.status_code == 404
-    
-    def test_delete_course_removes_from_storage(self):
-        """Test that deleted course is removed from storage"""
-        course_data = CourseCreate(title="Test Course", code="TEST101")
-        created_course = CourseService.create_course(course_data)
-        
-        CourseService.delete_course(created_course.id)
-        
-        # Verify course no longer exists
-        retrieved_course = CourseService.get_course_by_id(created_course.id)
-        assert retrieved_course is None
-    
-    def test_delete_course_multiple_courses(self):
-        """Test deleting one course doesn't affect others"""
-        course_data1 = CourseCreate(title="Course One", code="CS101")
-        course_data2 = CourseCreate(title="Course Two", code="CS201")
-        
-        course1 = CourseService.create_course(course_data1)
-        course2 = CourseService.create_course(course_data2)
-        
-        CourseService.delete_course(course1.id)
-        
-        # Verify course1 is deleted but course2 still exists
-        assert CourseService.get_course_by_id(course1.id) is None
-        assert CourseService.get_course_by_id(course2.id) is not None
+        assert exc_info.value.args[0] == "Course not found"

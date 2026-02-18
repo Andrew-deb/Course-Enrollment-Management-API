@@ -1,5 +1,3 @@
-from fastapi import HTTPException, status
-from app.schemas import course
 from app.schemas.course import CourseCreate, CourseUpdate, Course
 from app.core.db import courses
 
@@ -12,7 +10,7 @@ class CourseService:
         #To check if course code already exists
         for course in courses.values():
             if course.code == course_dict['code']:
-                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Course code already exists")
+                raise KeyError("Course code already exists")
 
         course_id = len(courses) + 1
 
@@ -39,14 +37,9 @@ class CourseService:
     # Update course
     @staticmethod
     def update_course(course_id: int, course_in: CourseUpdate):
-
         course = courses.get(course_id)
-
         if not course:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Course not found."
-            )
+            raise KeyError("Course not found")
 
         update_data = course_in.model_dump(exclude_unset=True)
 
@@ -54,7 +47,7 @@ class CourseService:
         if 'code' in update_data:
             for c in courses.values():
                 if c.code == update_data['code'] and c.id != course_id:
-                    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Course code already exists")
+                    raise KeyError("Course code already exists")
 
         updated_course = course.model_copy(update=update_data)
 
@@ -67,10 +60,7 @@ class CourseService:
     def delete_course(course_id: int):
 
         if course_id not in courses:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Course not found."
-            )
+            raise KeyError("Course not found")
 
         del courses[course_id]
 

@@ -11,8 +11,6 @@ from app.service.course import CourseService
 def client():
     return TestClient(app)
 
-
-
 @pytest.fixture
 def sample_admin_user():
     """Create and return a sample admin user"""
@@ -23,6 +21,14 @@ def sample_admin_user():
     )
     return UserService.create_user(user_data)
 
+@pytest.fixture(autouse=True)
+def clear_db():
+    """Clear in-memory database before each test"""
+    from app.core.db import users, courses, enrollments
+    users.clear()
+    courses.clear()
+    enrollments.clear()
+    yield
 
 @pytest.fixture
 def sample_student_user():

@@ -1,4 +1,3 @@
-from fastapi import HTTPException, status
 from typing import List
 from app.schemas.enrollment import EnrollmentCreate, Enrollment
 from app.core.db import enrollments, users, courses
@@ -12,18 +11,12 @@ class EnrollmentService:
         # Check user exists
         user = users.get(enrollment_in.user_id)
         if not user:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="User not found."
-            )
+            raise KeyError("User not found")
 
         # Check course exists
         course = courses.get(enrollment_in.course_id)
         if not course:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Course not found."
-            )
+            raise KeyError("Course not found")
 
         # Check duplicate enrollment
         for enrollment in enrollments.values():
@@ -31,10 +24,7 @@ class EnrollmentService:
                 enrollment.user_id == enrollment_in.user_id and
                 enrollment.course_id == enrollment_in.course_id
             ):
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Student already enrolled in this course."
-                )
+                raise ValueError("User is already enrolled in this course")
 
         enrollment_dict = enrollment_in.model_dump()
 
@@ -82,10 +72,7 @@ class EnrollmentService:
     def delete_enrollment(enrollment_id: int):
 
         if enrollment_id not in enrollments:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Enrollment not found."
-            )
+            raise KeyError("Enrollment not found")
 
         del enrollments[enrollment_id]
 

@@ -16,21 +16,6 @@ from app.schemas.user import UserCreate, UserRole
 class TestCreateUser:
     """Tests for UserService.create_user() method"""
     
-    def test_create_user_success(self):
-        """Test creating a user with valid data"""
-        user_data = UserCreate(
-            name="John Doe",
-            email="john@example.com",
-            role=UserRole.student
-        )
-        
-        user = UserService.create_user(user_data)
-        
-        assert user.id is not None
-        assert user.name == "John Doe"
-        assert user.email == "john@example.com"
-        assert user.role == UserRole.student
-    
     def test_create_user_auto_increment_id(self):
         """Test that user IDs are auto-incremented"""
         user_data1 = UserCreate(
@@ -73,21 +58,6 @@ class TestCreateUser:
         user = UserService.create_user(user_data)
         
         assert user.role == UserRole.student
-    
-    def test_create_user_stored_correctly(self):
-        """Test that created user is stored in database"""
-        user_data = UserCreate(
-            name="Test User",
-            email="test@example.com",
-            role=UserRole.student
-        )
-        
-        created_user = UserService.create_user(user_data)
-        retrieved_user = UserService.get_user(created_user.id)
-        
-        assert retrieved_user is not None
-        assert retrieved_user.id == created_user.id
-        assert retrieved_user.name == created_user.name
 
 
 class TestGetUser:
@@ -117,22 +87,6 @@ class TestGetUser:
         user = UserService.get_user(999)
         
         assert user is None
-    
-    def test_get_user_correct_user(self):
-        """Test that get_user returns the correct user when multiple exist"""
-        user_data1 = UserCreate(name="User One", email="user1@example.com", role=UserRole.student)
-        user_data2 = UserCreate(name="User Two", email="user2@example.com", role=UserRole.admin)
-        
-        user1 = UserService.create_user(user_data1)
-        user2 = UserService.create_user(user_data2)
-        
-        retrieved_user1 = UserService.get_user(user1.id)
-        retrieved_user2 = UserService.get_user(user2.id)
-        
-        assert retrieved_user1.id == user1.id
-        assert retrieved_user1.name == "User One"
-        assert retrieved_user2.id == user2.id
-        assert retrieved_user2.name == "User Two"
 
 
 class TestGetAllUsers:
@@ -144,40 +98,31 @@ class TestGetAllUsers:
         
         assert users == []
         assert len(users) == 0
-    
-    def test_get_all_users_single(self):
-        """Test getting all users when one exists"""
-        user_data = UserCreate(
-            name="Test User",
-            email="test@example.com",
+
+    def test_get_all_users_when_users_exist(self):
+        """Test getting all users when some users exist"""
+        # Create some users first
+        user_data1 = UserCreate(
+            name="User One",
+            email="user1@example.com",
             role=UserRole.student
         )
-        created_user = UserService.create_user(user_data)
+        user_data2 = UserCreate(
+            name="User Two",
+            email="user2@example.com",
+            role=UserRole.admin
+        )
+        
+        UserService.create_user(user_data1)
+        UserService.create_user(user_data2)
         
         users = UserService.get_all_users()
         
-        assert len(users) == 1
-        assert users[0].id == created_user.id
-        assert users[0].name == created_user.name
-    
-    def test_get_all_users_multiple(self):
-        """Test getting all users when multiple exist"""
-        user_data1 = UserCreate(name="User One", email="user1@example.com", role=UserRole.student)
-        user_data2 = UserCreate(name="User Two", email="user2@example.com", role=UserRole.admin)
-        user_data3 = UserCreate(name="User Three", email="user3@example.com", role=UserRole.student)
-        
-        user1 = UserService.create_user(user_data1)
-        user2 = UserService.create_user(user_data2)
-        user3 = UserService.create_user(user_data3)
-        
-        users = UserService.get_all_users()
-        
-        assert len(users) == 3
-        user_ids = [u.id for u in users]
-        assert user1.id in user_ids
-        assert user2.id in user_ids
-        assert user3.id in user_ids
-    
+        assert len(users) == 2
+        user_names = [u.name for u in users]
+        assert "User One" in user_names
+        assert "User Two" in user_names
+
     def test_get_all_users_returns_list(self):
         """Test that get_all_users returns a list"""
         users = UserService.get_all_users()

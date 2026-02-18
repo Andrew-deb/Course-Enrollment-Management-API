@@ -53,6 +53,19 @@ app/
         └── test_enrollment_service.py
 ```
 
+## Separation of Concerns
+
+This project keeps HTTP concerns in the route layer and business rules in the service layer:
+
+- **Service layer** handles domain logic and raises domain-specific errors using built-in exceptions like `ValueError` and `KeyError`.
+- **Route layer** catches service exceptions and converts them into `HTTPException` responses with the appropriate HTTP status codes.
+- **Schema layer** defines request/response models and validation rules for consistent data shapes.
+- **Core layer** holds shared infrastructure concerns like in-memory storage.
+- **Dependency layer** enforces role-based access control through injected checks.
+- **Test layer** validates both the API endpoints and service logic with isolated unit and integration tests.
+
+This keeps the core logic framework-agnostic and makes error handling consistent across endpoints.
+
 ## Installation
 
 ### Prerequisites

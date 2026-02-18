@@ -15,7 +15,12 @@ def create_enrollment(
     enrollment_in: EnrollmentCreate, 
     user: User = Depends(is_student_user)
     ):
-    return EnrollmentService.create_enrollment(enrollment_in)
+    try:
+        return EnrollmentService.create_enrollment(enrollment_in)
+    except KeyError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 # Deregister from a course
 @enrollment_router.delete("/{enrollment_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -23,7 +28,11 @@ def deregister_enrollment(
     enrollment_id: int, 
     user: User = Depends(is_student_user)
     ):
-    return EnrollmentService.delete_enrollment(enrollment_id)
+    try:
+        EnrollmentService.delete_enrollment(enrollment_id)
+        return None
+    except KeyError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
    
 
 # Retrieve enrollments for a specific student
@@ -55,5 +64,9 @@ def force_deregister_enrollment(
     enrollment_id: int, 
     admin_user: User = Depends(is_admin_user)
     ):
-    return EnrollmentService.delete_enrollment(enrollment_id)
+    try:
+        EnrollmentService.delete_enrollment(enrollment_id)
+        return None
+    except KeyError as e:
+        raise HTTPException(status_code=404, detail=str(e))
     

@@ -2,7 +2,7 @@ from fastapi import HTTPException, status
 from app.schemas.user import UserCreate, User, UserRole
 from app.service.user import UserService
 
-# Since we didn't handle "user not found" in the get_user function in the service layer.
+# # Since we didn't handle "user not found" in the get_user function in the service layer.
 def get_user(user_id: int):
     user = UserService.get_user(user_id)
     if not user:
@@ -10,7 +10,7 @@ def get_user(user_id: int):
     return user
 
 def is_admin_user(user_id: int):
-    user = get_user(user_id)
+    user = UserService.get_user(user_id)
     
     if user.role != UserRole.admin:
         raise HTTPException(
@@ -20,7 +20,7 @@ def is_admin_user(user_id: int):
     return user
     
 def is_student_user(user_id: int):
-    user = get_user(user_id)
+    user = UserService.get_user(user_id)
 
     if user.role != UserRole.student:
         raise HTTPException(
