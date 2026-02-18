@@ -290,12 +290,12 @@ class TestDeleteCourse:
         
         assert response.status_code == 404
     
-    # def test_delete_course_invalid_user(self, client, sample_course):
-    #     """Test deleting course with non-existent user (404)"""
-    #     course_id = sample_course.id
-    #     response = client.delete(
-    #         f"/courses/{course_id}",
-    #         params={"user_id": 999}
-    #     )
+    def test_delete_course_invalid_user(self, client, sample_course):
+        """Test deleting course with non-existent user (404)"""
+        course_id = sample_course.id
+        response = client.delete(
+            f"/courses/{course_id}",
+            params={"user_id": 999}
+        )
         
-    #     assert response.status_code == 404
+        assert response.status_code == 404

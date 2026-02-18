@@ -164,18 +164,18 @@ class TestDeregisterEnrollment:
         
         assert response.status_code == 404
     
-    # def test_deregister_invalid_user(self, client, sample_student_user, sample_course):
-    #     """Test deregistering with invalid user (404)"""
-    #     # Create enrollment
-    #     enrollment = EnrollmentService.create_enrollment(
-    #         EnrollmentCreate(user_id=sample_student_user.id, course_id=sample_course.id)
-    #     )
+    def test_deregister_invalid_user(self, client, sample_student_user, sample_course):
+        """Test deregistering with invalid user (404)"""
+        # Create enrollment
+        enrollment = EnrollmentService.create_enrollment(
+            EnrollmentCreate(user_id=sample_student_user.id, course_id=sample_course.id)
+        )
         
-    #     # Try to deregister with invalid user
-    #     response = client.delete(
-    #         f"/enrollments/{enrollment.id}",
-    #         params={"user_id": 999}
-    #     )
+        # Try to deregister with invalid user
+        response = client.delete(
+            f"/enrollments/{enrollment.id}",
+            params={"user_id": 999}
+        )
         
         assert response.status_code == 404
 

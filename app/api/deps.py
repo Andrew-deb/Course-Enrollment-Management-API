@@ -12,6 +12,8 @@ def get_user(user_id: int):
 def is_admin_user(user_id: int):
     user = UserService.get_user(user_id)
     
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     if user.role != UserRole.admin:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, 
@@ -21,6 +23,9 @@ def is_admin_user(user_id: int):
     
 def is_student_user(user_id: int):
     user = UserService.get_user(user_id)
+
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
     if user.role != UserRole.student:
         raise HTTPException(
